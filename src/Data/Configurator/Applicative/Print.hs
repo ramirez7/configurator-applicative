@@ -5,7 +5,7 @@
 {-# LANGUAGE RecordWildCards           #-}
 {-# LANGUAGE StandaloneDeriving        #-}
 {-# LANGUAGE TypeFamilies              #-}
-module Data.Configurator.Descriptive.Print where
+module Data.Configurator.Applicative.Print where
 
 import           Data.List                     (intersperse)
 import           Data.List.NonEmpty            (toList, NonEmpty)
@@ -16,7 +16,7 @@ import           Data.SCargot.Repr.WellFormed
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
 
-import           Data.Configurator.Descriptive (Description (..), Lookup (..))
+import           Data.Configurator.Applicative (Description (..), Lookup (..))
 
 data DescTree a =
     Node a

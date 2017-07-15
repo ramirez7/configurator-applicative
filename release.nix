@@ -4,7 +4,7 @@ let
       haskellPackages = pkgs.haskellPackages.override {
         overrides = haskellPackagesNew: haskellPackagesOld: rec {
 
-          configurator-descriptive =
+          configurator-applicative =
             haskellPackagesNew.callPackage ./default.nix { };
 
           s-cargot =
@@ -17,5 +17,5 @@ let
   pkgs = import <nixpkgs> { inherit config; };
 
 in
-  { configurator-descriptive = pkgs.haskellPackages.configurator-descriptive;
+  { configurator-applicative = pkgs.haskellPackages.configurator-applicative;
   }

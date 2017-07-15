@@ -8,7 +8,7 @@ let
                        then pkgs.haskellPackages
                        else pkgs.haskell.packages.${compiler};
 
-  drv = (import ./release.nix).configurator-descriptive;
+  drv = (import ./release.nix).configurator-applicative;
 
 in
 

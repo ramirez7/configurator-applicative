@@ -2,7 +2,7 @@
 , stdenv, text
 }:
 mkDerivation {
-  pname = "configurator-descriptive";
+  pname = "configurator-applicative";
   version = "0.1.0.0";
   src = ./.;
   libraryHaskellDepends = [
