@@ -18,9 +18,19 @@ cabal-version:       >=1.10
 library
   exposed-modules:
     Data.Configurator.Applicative
+    Data.Configurator.Applicative.Parser
     Data.Configurator.Applicative.Print
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.9 && <4.10, configurator, text, mtl, containers, s-cargot
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+executable examples
+  main-is: main.hs
+  hs-source-dirs:
+      examples
+  build-depends:
+      base >=4.9 && <4.10
+    , text
+    , configurator-applicative

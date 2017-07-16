@@ -1,3 +1,5 @@
+# nix-build -A configurator-applicative release.nix
+
 let
   config = {
     packageOverrides = pkgs: rec {

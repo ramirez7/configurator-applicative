@@ -7,16 +7,19 @@
 {-# LANGUAGE TypeFamilies              #-}
 module Data.Configurator.Applicative.Print where
 
-import           Data.List                     (intersperse)
-import           Data.List.NonEmpty            (toList, NonEmpty)
-import           Data.Maybe                    (mapMaybe)
-import           Data.Monoid                   ((<>))
+import qualified Data.Foldable                        as F
+import           Data.List                            (intersperse)
+import           Data.List.NonEmpty                   (NonEmpty, toList)
+import           Data.Map                             (Map)
+import qualified Data.Map                             as M
+import           Data.Maybe                           (mapMaybe)
+import           Data.Monoid                          ((<>))
 import           Data.SCargot.Print
 import           Data.SCargot.Repr.WellFormed
-import           Data.Text                     (Text)
-import qualified Data.Text                     as T
+import           Data.Text                            (Text)
+import qualified Data.Text                            as T
 
-import           Data.Configurator.Applicative (Description (..), Lookup (..))
+import           Data.Configurator.Applicative.Parser (Lookup (..), Parser (..))
 
 data DescTree a =
     Node a
@@ -29,12 +32,12 @@ data DescTree a =
 deriving instance Eq a => Eq (DescTree a)
 deriving instance Show a => Show (DescTree a)
 
-mkTree :: Description a -> DescTree Text
-mkTree (NilD _)    = AndNode []
-mkTree (LookupD lk) = Node $ prettyLookup lk
-mkTree (OrD lhs rhs) = OrNode [mkTree lhs, mkTree rhs]
-mkTree (AndD lhs rhs) = AndNode [mkTree lhs, mkTree rhs]
-mkTree (ForkD descb options) = ForkNode (mkTree descb) $ fmap (\(x, d) -> (tshow x, mkTree d)) options
+mkTree :: Parser a -> DescTree Text
+mkTree (NilP _)    = AndNode []
+mkTree (LookupP lk) = Node $ prettyLookup lk
+mkTree (OrP lhs rhs) = OrNode [mkTree lhs, mkTree rhs]
+mkTree (AndP lhs rhs) = AndNode [mkTree lhs, mkTree rhs]
+mkTree (ForkP descb options) = ForkNode (mkTree descb) $ fmap (\(x, d) -> (tshow x, mkTree d)) options
 
 -- TODO: Make DescTree x where x is more structured than Text. SExpr module can handle printing it
 
@@ -86,25 +89,53 @@ toSExpr (ForkNode test forks) = WFSList $ "Fork" : toSExpr test : fmap forkSExpr
   where
     forkSExpr (cond, child) = [WFSAtom cond, toSExpr child]
 
-prettySExp :: Description a -> Text
+prettySExp :: Parser a -> Text
 prettySExp = encodeOne (basicPrint id) . fromWellFormed . toSExpr . filterTree . simplify . mkTree
 
-prettyKeys :: Description a -> Text
-prettyKeys =  mconcat . intersperse "\n" . fmap prettySomeLookup . prettyLookupsList
+keysFlat :: Parser a -> Text
+keysFlat =  mconcat . intersperse "\n" . fmap prettySomeLookup . lookupsList
+
+keysNested :: Parser a -> Text
+keysNested = mconcat . intersperse "\n" . go 0 . lookupsMap
+  where
+    go ident (LookupMap mp sls) =
+          M.foldMapWithKey (\k lm -> mkIdent ident <> k : go (ident + 2) lm) mp
+          ++ fmap (\sl -> mkIdent ident <> prettySomeLookup sl) sls
+    mkIdent = flip T.replicate " "
 
 data SomeLookup = forall a. SomeLookup (Lookup a)
+
+prettySomeLookup :: SomeLookup -> Text
 prettySomeLookup (SomeLookup lk) = prettyLookup lk
 
-prettyLookupsList :: Description a -> [SomeLookup]
-prettyLookupsList (NilD _) = []
-prettyLookupsList (LookupD lk) = [SomeLookup lk]
-prettyLookupsList (OrD lhs rhs) = prettyLookupsList lhs ++ prettyLookupsList rhs
-prettyLookupsList (AndD lhs rhs) = prettyLookupsList lhs ++ prettyLookupsList rhs
-prettyLookupsList (ForkD descb options) = prettyLookupsList descb ++ (toList options >>= prettyLookupsList . snd)
+lookupsList :: Parser a -> [SomeLookup]
+lookupsList (NilP _) = []
+lookupsList (LookupP lk) = [SomeLookup lk]
+lookupsList (OrP lhs rhs) = lookupsList lhs ++ lookupsList rhs
+lookupsList (AndP lhs rhs) = lookupsList lhs ++ lookupsList rhs
+lookupsList (ForkP descb options) = lookupsList descb ++ (toList options >>= lookupsList . snd)
 
+data LookupMap = LookupMap (Map Text LookupMap) [SomeLookup]
+
+lookupsMap :: Parser a -> LookupMap
+lookupsMap (NilP _) = LookupMap mempty mempty
+lookupsMap (LookupP lk) = mkLookupMap lk
+lookupsMap (OrP lhs rhs) = unionLookupMap (lookupsMap lhs) (lookupsMap rhs)
+lookupsMap (AndP lhs rhs) = unionLookupMap (lookupsMap lhs) (lookupsMap rhs)
+lookupsMap (ForkP descb options) = unionLookupMap (lookupsMap descb) (F.foldl' unionLookupMap (LookupMap mempty mempty) $ fmap (lookupsMap . snd) options)
+
+mkLookupMap :: Lookup a -> LookupMap
+mkLookupMap lk = go (T.splitOn "." (lookupKey lk))
+  where
+    go []       = error "impossible due to splitOn"
+    go [x]      = LookupMap mempty $ pure (SomeLookup $ lk { lookupKey = x })
+    go (x : xs) = LookupMap (M.singleton x (go xs)) mempty
+
+unionLookupMap :: LookupMap -> LookupMap -> LookupMap
+unionLookupMap (LookupMap xmp xls) (LookupMap ymp yls)= LookupMap (M.unionWith unionLookupMap xmp ymp) (xls ++ yls)
 
 prettyLookup :: Lookup a -> Text
-prettyLookup Lookup{..} = lookupKey <> " :: " <> tshow lookupType <> " -- " <> lookupDescription
+prettyLookup Lookup{..} = lookupKey <> " :: " <> tshow lookupType <> maybe "" (" -- " <>) lookupDescription
 
 tshow :: Show a => a -> Text
 tshow = T.pack . show
