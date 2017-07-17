@@ -2,6 +2,8 @@ Self-describing parsers for configurator files.
 
 Never waste time wondering what a config should look like again!
 
+The approach taken is pretty shameless inspired by `optparse-applicative`, but the problem being solved is very similar as well.
+
 ### Example
 The `examples` binary has an example parser:
 
