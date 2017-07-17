@@ -34,7 +34,7 @@ combinedParser :: Parser (Person, DatabaseConfig)
 combinedParser = (,) <$> personParser <*> databaseConfigParser
 ```
 
-Asking for the flat list of keys gives you this:
+Asking `combinedParser` for the flat list of keys gives you this:
 ```
 person.first :: Text -- their first name
 person.last :: Text -- their last name
@@ -45,7 +45,7 @@ database.password :: Text -- postgres password
 database.path :: Text -- relative path to where files should be stored
 ```
 
-Asking for it nested gives you this:
+Asking it for nested keys gives you this:
 ```
 database
   type :: Text -- rdbms | file | in-memory
