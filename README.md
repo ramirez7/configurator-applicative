@@ -1,8 +1,16 @@
-Self-describing parsers for configurator files.
+# `configurator-applicative`
 
-Never waste time wondering what a config should look like again!
+> The for-itself is the in-itself losing itself as in-itself in order to found itself as consciousness.
 
-The approach taken is pretty shameless inspired by `optparse-applicative`, but the problem being solved is very similar as well.
+**This is all still very WIP!**
+
+Self-describing parsers for configurator files. Never waste time wondering what a config should look like again!
+
+## Motivation
+
+`configurator` is a pretty nice library for parsing config files, but one problem that arises when working with it in a team is that the config file format is a by-product of the parsing code. So if you want to know how to create a config file from scratch that satisfies a parser, your only option is to read through the parsing code.
+
+It doesn't have to be this way. For example, `optparse-applicative` is a great command line argument parser, but you don't need to read Haskell code to know what command line arguments to pass to it. The selling point of the library is that you get `--help` for free! `optparse-applicative` parsers are able to describe themselves by inspecting their structure. `configurator-applicative` aims to do this same sort of thing but with config file parsers. In fact, the `configurator-applicative`'s design is pretty shamelessly inspired by `optparse-applicative`!
 
 ### Example
 The `examples` binary has an example parser:
@@ -59,5 +67,3 @@ person
   last :: Text -- their last name
   age :: Int -- their age
 ```
-
-**This is all still very WIP!**

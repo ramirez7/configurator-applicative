@@ -46,6 +46,9 @@ require' key desc convert = LookupP (Lookup key (typeRep (Proxy :: Proxy a)) (un
 fork :: (Eq b, Show b) => Parser b -> NonEmpty (b, Parser a) -> Parser a
 fork = ForkP
 
+-- TODO: It would be nice to have a fork combinator that walks the NonEmpty and
+-- uses all the dispatch values to create the description.
+
 printKeysFlat :: Parser a -> IO ()
 printKeysFlat = T.putStrLn . keysFlat
 
