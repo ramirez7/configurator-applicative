@@ -6,9 +6,9 @@ Self-describing parsers for configurator files. Never waste time wondering what 
 
 ## Motivation
 
-`configurator` is a pretty nice library for parsing config files, but one problem that arises when working with it in a team is that the config file format is a by-product of the parsing code. So if you want to know how to create a config file from scratch that satisfies a parser, your only option is to read through the parsing code.
+`configurator` is a pretty nice library for parsing config files, but one problem that arises when working with it in a team is that the config file format is a by-product of the parsing code. If a teammate adds parsing for a new key, the only ways for you to know how to populate that key are to read through the parsing source or ask your teammates.
 
-It doesn't have to be this way. For example, `optparse-applicative` is a great command line argument parser, but you don't need to read Haskell code to know what command line arguments to pass to it. The selling point of the library is that you get `--help` for free! `optparse-applicative` parsers are able to describe themselves by inspecting their structure. `configurator-applicative` aims to do this same sort of thing but with config file parsers. In fact, the `configurator-applicative`'s design is pretty shamelessly inspired by `optparse-applicative`!
+It doesn't have to be this way. For example, `optparse-applicative` is a great command line argument parsing library, but you don't need to read Haskell code to figure out the expectations of an implemented parser. The selling point of the library is that you get `--help` for free! `optparse-applicative` parsers are able to describe themselves by inspecting their structure. `configurator-applicative` aims to do this same sort of thing but with config file parsers. In fact, the `configurator-applicative`'s design is pretty shamelessly inspired by `optparse-applicative`!
 
 **This is all still very WIP!**
 
